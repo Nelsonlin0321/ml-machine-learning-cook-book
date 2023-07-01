@@ -161,4 +161,4 @@ cython_debug/
 artifacts
 data
 .DS_Store
-neural-cf-networking-with-pytorch/model
+checkpoint-*

@@ -30,3 +30,5 @@ def save_model(model, model_save_dir,step,model_metrics):
     if model_metrics is not None:
         with open(train_state_path,mode = 'w',encoding = 'utf-8') as f:
             json.dump(model_metrics,f,indent=4)
+            
+    return model_path

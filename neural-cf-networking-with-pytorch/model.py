@@ -9,14 +9,25 @@ class NeuMF(torch.nn.Module):
         # matrix factorization part
         self.embedding_user_mf = torch.nn.Embedding(
             num_embeddings=self.config.num_user, embedding_dim=self.config.latent_dim_mf)
+        if config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_user_mf.weight)
+
         self.embedding_item_mf = torch.nn.Embedding(
             num_embeddings=self.config.num_item, embedding_dim=self.config.latent_dim_mf)
+        if config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_item_mf.weight)
 
         # multilayer perceptron part
         self.embedding_user_mlp = torch.nn.Embedding(
             num_embeddings=self.config.num_user, embedding_dim=self.config.latent_dim_mlp)
+        if config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_user_mlp.weight)
+
         self.embedding_item_mlp = torch.nn.Embedding(
             num_embeddings=self.config.num_item, embedding_dim=self.config.latent_dim_mlp)
+        
+        if config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_item_mlp.weight)
 
         self.fc_layers = torch.nn.ModuleList()
         for idx, (in_size, out_size) in enumerate(zip(self.config.layers[:-1], self.config.layers[1:])):

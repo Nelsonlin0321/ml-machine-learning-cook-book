@@ -14,7 +14,7 @@ def evaluate(model,dataset_loader):
 
     loss_func = torch.nn.BCELoss()
 
-    pbar = tqdm(total = len(dataset_loader),desc = "Model Evaluating",position=0, leave=True)
+    pbar = tqdm(total = len(dataset_loader),desc = "",position=0, leave=True)
 
     for inputs in dataset_loader:
         with torch.no_grad():

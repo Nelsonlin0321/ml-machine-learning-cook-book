@@ -20,7 +20,8 @@ def evaluate(model,dataset_loader):
         with torch.no_grad():
             probs = model(
                 user_indices=inputs['user_embed_id'],
-                item_indices=inputs['movie_embed_id']
+                item_indices=inputs['movie_embed_id'],
+                genre_indices=inputs['genres_embed_ids']
                 )
             
             rating = inputs['rating'].view(-1,1)

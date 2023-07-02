@@ -9,20 +9,35 @@ class NeuMF(torch.nn.Module):
         # matrix factorization part
         self.embedding_user_mf = torch.nn.Embedding(
             num_embeddings=self.config.num_user, embedding_dim=self.config.latent_dim_mf)
-        torch.nn.init.xavier_uniform_(self.embedding_user_mf.weight)
+        if self.config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_user_mf.weight)
 
         self.embedding_item_mf = torch.nn.Embedding(
             num_embeddings=self.config.num_item, embedding_dim=self.config.latent_dim_mf)
-        torch.nn.init.xavier_uniform_(self.embedding_item_mf.weight)
+        if self.config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_item_mf.weight)
+
+        self.embedding_genre_mf = torch.nn.Embedding(
+            num_embeddings=self.config.num_genre, embedding_dim=self.config.latent_dim_mf)
+        if self.config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_genre_mf.weight)
+
 
         # multilayer perceptron part
         self.embedding_user_mlp = torch.nn.Embedding(
             num_embeddings=self.config.num_user, embedding_dim=self.config.latent_dim_mlp)
-        torch.nn.init.xavier_uniform_(self.embedding_user_mlp.weight)
+        if self.config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_user_mlp.weight)
 
         self.embedding_item_mlp = torch.nn.Embedding(
             num_embeddings=self.config.num_item, embedding_dim=self.config.latent_dim_mlp)
-        torch.nn.init.xavier_uniform_(self.embedding_item_mlp.weight)
+        if self.config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_item_mlp.weight)
+
+        self.embedding_genre_mlp = torch.nn.Embedding(
+            num_embeddings=self.config.num_genre, embedding_dim=self.config.latent_dim_mlp)
+        if self.config.use_xavier_uniform:
+            torch.nn.init.xavier_uniform_(self.embedding_genre_mlp.weight)
 
         self.fc_layers = torch.nn.ModuleList()
         for idx, (in_size, out_size) in enumerate(zip(self.config.layers[:-1], self.config.layers[1:])):
@@ -32,21 +47,29 @@ class NeuMF(torch.nn.Module):
             in_features=self.config.layers[-1] + self.config.latent_dim_mf, out_features=1)
         self.sigmoid = torch.nn.Sigmoid()
 
-    def forward(self, user_indices, item_indices):
+    def forward(self, user_indices, item_indices,genre_indices):
         user_embedding_mlp = self.embedding_user_mlp(user_indices)
         item_embedding_mlp = self.embedding_item_mlp(item_indices)
+        genre_embedding_mlp = self.embedding_genre_mlp(genre_indices)
+        genre_embedding_mlp = torch.mean(genre_embedding_mlp,axis=1)
 
         user_embedding_mf = self.embedding_user_mf(user_indices)
         item_embedding_mf = self.embedding_item_mf(item_indices)
+        genre_embedding_mf = self.embedding_genre_mf(genre_indices)
+        genre_embedding_mf = torch.max(genre_embedding_mf,axis=1)[0]
+
 
         # mf part: element-wise product
-        mf_vector = torch.mul(user_embedding_mf, item_embedding_mf)
+        mf_vector = torch.mul(item_embedding_mf, genre_embedding_mf)
+        mf_vector = torch.nn.Dropout(self.config.dropout_rate_mf)(mf_vector)
+
+        mf_vector = torch.mul(user_embedding_mf, mf_vector)
         mf_vector = torch.nn.Dropout(self.config.dropout_rate_mf)(mf_vector)
 
         # mlp part
         # the concat latent vector
         mlp_vector = torch.cat(
-            [user_embedding_mlp, item_embedding_mlp], dim=-1)
+            [user_embedding_mlp, item_embedding_mlp,genre_embedding_mlp], dim=-1)
 
         for idx, _ in enumerate(range(len(self.fc_layers))):
             mlp_vector = self.fc_layers[idx](mlp_vector)

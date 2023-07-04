@@ -162,3 +162,6 @@ artifacts
 data
 .DS_Store
 checkpoint-*
+*.zip
+*.csv
+*.dat

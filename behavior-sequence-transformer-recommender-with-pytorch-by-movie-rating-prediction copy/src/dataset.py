@@ -15,9 +15,11 @@ class RatingDataset(Dataset):
         item_dict = self.data.iloc[index].to_dict()
         item_dict['target_rating'] = item_dict['rating_sequence'][-1]
         item_dict['rating_sequence'] = item_dict['rating_sequence'][:-1]
+
         item_dict['target_movie']= item_dict['movie_sequence'][-1]
+        item_dict['movie_sequence']= item_dict['movie_sequence'][:-1]
 
 
-        sample = {k:torch.tensor(v) for k,v in item_dict.items()}
+        sample = {k:torch.tensor(v,dtype=torch.long) for k,v in item_dict.items()}
 
         return sample

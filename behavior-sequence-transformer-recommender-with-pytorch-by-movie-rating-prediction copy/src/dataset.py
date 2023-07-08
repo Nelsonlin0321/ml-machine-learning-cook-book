@@ -1,6 +1,5 @@
 import torch
 from torch.utils.data import Dataset
-# from torch.nn.utils.rnn import pad_sequence
 
 
 class RatingDataset(Dataset):
@@ -13,11 +12,17 @@ class RatingDataset(Dataset):
     def __getitem__(self, index):
         
         item_dict = self.data.iloc[index].to_dict()
-        item_dict['target_rating'] = item_dict['rating_sequence'][-1]
-        item_dict['rating_sequence'] = item_dict['rating_sequence'][:-1]
-        item_dict['target_movie']= item_dict['movie_sequence'][-1]
+
+        dtype_dict = {}
+        for k,v in item_dict.items():
+            dtype_dict[k]=torch.long
+        dtype_dict['rating_sequence']=torch.float32
+        dtype_dict['target_rating']=torch.float32
+        dtype_dict['sex']=torch.float32
 
 
-        sample = {k:torch.tensor(v) for k,v in item_dict.items()}
-
+        sample = {}
+        for k,v in item_dict.items():
+            sample[k] = torch.tensor(v,dtype=dtype_dict[k])
+            
         return sample

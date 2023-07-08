@@ -35,5 +35,4 @@ def evaluate(model,dataset_loader,loss_func=nn.L1Loss()):
 
     eval_metrics = {}
     eval_metrics['eval_loss']= sum(eval_loss_list)/len(eval_loss_list)
-    
     return eval_metrics
